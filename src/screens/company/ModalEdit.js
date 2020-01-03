@@ -7,7 +7,6 @@ import {
   TextInput,
   Alert,
   ScrollView,
-  Platform,
 } from 'react-native';
 import {validationService} from '../../public/validation/serviceForm';
 

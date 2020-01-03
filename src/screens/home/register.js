@@ -5,9 +5,10 @@ import {
   View,
   TouchableOpacity,
   TextInput,
-  // Image,
+  Image,
   Picker,
   Alert,
+  BackHandler,
 } from 'react-native';
 import {StackActions, NavigationActions} from 'react-navigation';
 import {validationService} from '../../public/validation/service';
@@ -50,6 +51,7 @@ class FormSignUp extends Component {
     this.onInputChange = validationService.onInputChange.bind(this);
     this.getFormValidation = validationService.getFormValidation.bind(this);
     this.submit = this.submit.bind(this);
+    this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
   }
 
   async submit() {
@@ -148,14 +150,32 @@ class FormSignUp extends Component {
     }
     return null;
   }
+  componentWillMount() {
+    BackHandler.addEventListener(
+      'hardwareBackPress',
+      this.handleBackButtonClick,
+    );
+  }
+
+  componentWillUnmount() {
+    BackHandler.removeEventListener(
+      'hardwareBackPress',
+      this.handleBackButtonClick,
+    );
+  }
+
+  handleBackButtonClick() {
+    this.props.navigation.goBack(null);
+    return true;
+  }
 
   render() {
     return (
       <View style={styles.container}>
-        {/* <Image
-          style={{marginBottom: 50, width: 70, height: 70}}
-          source={require('./asset/icon-app.png')}
-        /> */}
+        <Image
+          style={styles.image}
+          source={require('../../public/images/images.jpeg')}
+        />
         <Spinner
           visible={this.props.isLoading}
           textContent={'Loading...'}
@@ -303,6 +323,7 @@ const styles = StyleSheet.create({
   spinnerTextStyle: {
     color: '#FFF',
   },
+  image: {width: 250, height: 200},
 });
 
 const mapStateToProps = state => ({
@@ -315,4 +336,7 @@ const mapDispatchToProps = dispatch => ({
   register: data => dispatch(register(data)),
 });
 // export default FormLogin;
-export default connect(mapStateToProps, mapDispatchToProps)(FormSignUp);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(FormSignUp);

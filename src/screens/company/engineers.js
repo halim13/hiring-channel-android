@@ -87,7 +87,7 @@ class Engineers extends Component {
   };
   nextPage = async () => {
     const {pages} = this.props;
-    const next = parseInt(pages.page) + 1;
+    const next = parseInt(pages.page, 10) + 1;
     try {
       await this.props.fetch(
         pages.search,
@@ -133,9 +133,9 @@ class Engineers extends Component {
 
   loadMore = async () => {
     const {pages} = this.props;
-    if (parseInt(pages.page) !== parseInt(pages.totalPage)) {
+    if (parseInt(pages.page, 10) !== parseInt(pages.totalPage, 10)) {
       try {
-        const page = parseInt(pages.page) + 1;
+        const page = parseInt(pages.page, 10) + 1;
         await this.props.load(
           pages.search,
           pages.sort,
@@ -300,4 +300,7 @@ const mapDispatchToProps = dispatch => ({
   load: (search, sort, order, page, limit) =>
     dispatch(load(search, sort, order, page, limit)),
 });
-export default connect(mapStateToProps, mapDispatchToProps)(Engineers);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(Engineers);

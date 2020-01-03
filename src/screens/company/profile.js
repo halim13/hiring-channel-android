@@ -70,15 +70,15 @@ class profile extends Component {
                       [
                         {
                           text: 'Cancel',
-                          onPress: () => console.log('Cancel Pressed'),
+                          // onPress: () => console.log('Cancel Pressed'),
                           style: 'cancel',
                         },
                         {
                           text: 'OK',
                           onPress: async () => {
                             await this.props.logout();
-                            await this.props.delete(this.props.company.user_id);
                             this.props.navigation.popToTop();
+                            await this.props.delete(this.props.company.user_id);
                           },
                         },
                       ],
@@ -97,7 +97,7 @@ class profile extends Component {
                     [
                       {
                         text: 'No',
-                        onPress: () => console.log('No Pressed'),
+                        // onPress: () => console.log('No Pressed'),
                         style: 'cancel',
                       },
                       {
@@ -222,4 +222,7 @@ const mapDispatchToProps = dispatch => ({
   delete: id => dispatch(deleteCompany(id)),
   logout: id => dispatch(logout()),
 });
-export default connect(mapStateToProps, mapDispatchToProps)(profile);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(profile);

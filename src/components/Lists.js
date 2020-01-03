@@ -7,7 +7,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 const Lists = props => {
   const {item, navigation} = props;
-  console.log(navigation.navigate);
+  // console.log(navigation.navigate);
   return (
     <List>
       <ListItem

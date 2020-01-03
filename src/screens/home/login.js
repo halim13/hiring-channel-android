@@ -5,8 +5,9 @@ import {
   View,
   TouchableOpacity,
   TextInput,
-  // Image,
+  Image,
   Alert,
+  BackHandler,
 } from 'react-native';
 import {validationService} from '../../public/validation/service';
 import JWT from 'jwt-decode';
@@ -42,10 +43,30 @@ class FormLogin extends Component {
     this.onInputChange = validationService.onInputChange.bind(this);
     this.getFormValidation = validationService.getFormValidation.bind(this);
     this.submit = this.submit.bind(this);
+    this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
+  }
+
+  componentWillMount() {
+    BackHandler.addEventListener(
+      'hardwareBackPress',
+      this.handleBackButtonClick,
+    );
+  }
+
+  UNSAFE_componentWillUnmount() {
+    BackHandler.removeEventListener(
+      'hardwareBackPress',
+      this.handleBackButtonClick,
+    );
+  }
+
+  handleBackButtonClick() {
+    this.props.navigation.goBack(null);
+    return true;
   }
 
   async submit() {
-    this.getFormValidation();
+    await this.getFormValidation();
     const {username, password} = this.state.inputs;
     const data = {
       username: username.value,
@@ -116,10 +137,10 @@ class FormLogin extends Component {
   render() {
     return (
       <View style={styles.container}>
-        {/* <Image
-          style={{marginBottom: 50, width: 70, height: 70}}
-          source={require('./asset/icon-app.png')}
-        /> */}
+        <Image
+          style={styles.image}
+          source={require('../../public/images/images.jpeg')}
+        />
         {this.props.isLoading && (
           <Spinner
             visible={this.props.isLoading}
@@ -127,61 +148,61 @@ class FormLogin extends Component {
             textStyle={styles.spinnerTextStyle}
           />
         )}
-        {!this.props.isLoading && (
-          <>
-            <View>
-              <TextInput
-                autoFocus={this.props.user ? false : true}
-                ref={el => (this.username = el)}
-                style={styles.textInput}
-                placeholder="Username"
-                autoCapitalize="none"
-                returnKeyType="next"
-                onChangeText={value => {
-                  this.onInputChange({id: 'username', value});
-                }}
-                onSubmitEditing={val => {
-                  this.password.focus();
-                }}
-              />
-              {this.renderError('username')}
-            </View>
-            <View>
-              <TextInput
-                ref={el => (this.password = el)}
-                secureTextEntry
-                style={[styles.textInput]}
-                placeholder="Password"
-                returnKeyType="go"
-                onChangeText={value => {
-                  this.onInputChange({id: 'password', value});
-                }}
-                onSubmitEditing={this.submit}
-              />
-              {this.renderError('password')}
-            </View>
+        {/* {!this.props.isLoading && ( */}
+        <>
+          <View>
+            <TextInput
+              autoFocus={this.props.user ? false : true}
+              ref={el => (this.username = el)}
+              style={styles.textInput}
+              placeholder="Username"
+              autoCapitalize="none"
+              returnKeyType="next"
+              onChangeText={value => {
+                this.onInputChange({id: 'username', value});
+              }}
+              onSubmitEditing={val => {
+                this.password.focus();
+              }}
+            />
+            {this.renderError('username')}
+          </View>
+          <View>
+            <TextInput
+              ref={el => (this.password = el)}
+              secureTextEntry
+              style={[styles.textInput]}
+              placeholder="Password"
+              returnKeyType="go"
+              onChangeText={value => {
+                this.onInputChange({id: 'password', value});
+              }}
+              onSubmitEditing={this.submit}
+            />
+            {this.renderError('password')}
+          </View>
 
-            <TouchableOpacity style={styles.buttonStyle} onPress={this.submit}>
-              <Text style={styles.textSignup}>Login</Text>
+          <TouchableOpacity style={styles.buttonStyle} onPress={this.submit}>
+            <Text style={styles.textSignup}>Login</Text>
+          </TouchableOpacity>
+          <View style={styles.row}>
+            <Text style={styles.instructions}>Don’t have account? </Text>
+            <TouchableOpacity
+              onPress={() => {
+                const resetAction = StackActions.reset({
+                  index: 0,
+                  actions: [
+                    NavigationActions.navigate({routeName: 'Register'}),
+                  ],
+                });
+                this.props.navigation.dispatch(resetAction);
+                // this.props.navigation.navigate('Register');
+              }}>
+              <Text style={styles.register}>Register</Text>
             </TouchableOpacity>
-            <View style={styles.row}>
-              <Text style={styles.instructions}>Don’t have account? </Text>
-              <TouchableOpacity
-                onPress={() => {
-                  const resetAction = StackActions.reset({
-                    index: 0,
-                    actions: [
-                      NavigationActions.navigate({routeName: 'Register'}),
-                    ],
-                  });
-                  this.props.navigation.dispatch(resetAction);
-                  // this.props.navigation.navigate('Register');
-                }}>
-                <Text style={styles.register}>Register</Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
+          </View>
+        </>
+        {/* )} */}
       </View>
     );
   }
@@ -237,6 +258,7 @@ const styles = StyleSheet.create({
     color: 'red',
     fontSize: 12,
   },
+  image: {width: 250, height: 200},
 });
 
 const mapStateToProps = state => ({
@@ -251,4 +273,7 @@ const mapDispatchToProps = dispatch => ({
   login: data => dispatch(login(data)),
 });
 // export default FormLogin;
-export default connect(mapStateToProps, mapDispatchToProps)(FormLogin);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(FormLogin);

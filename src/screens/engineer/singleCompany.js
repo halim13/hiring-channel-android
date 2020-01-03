@@ -4,10 +4,8 @@ import {
   Text,
   StyleSheet,
   Image,
-  FlatList,
   ScrollView,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import Icons from 'react-native-vector-icons/FontAwesome';
 import {Header, Left, Body, Right, Button, Icon, Title} from 'native-base';
@@ -23,7 +21,7 @@ const SingleCompany = props => {
   const location = navigation.getParam('location', '-');
   const email = navigation.getParam('email', '-');
   const no_contact = navigation.getParam('no_contact', '-');
-  const companies = navigation.getParam('allProps', {});
+  // const companies = navigation.getParam('allProps', {});
 
   return (
     <>

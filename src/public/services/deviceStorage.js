@@ -5,7 +5,7 @@ const deviceStorage = {
     try {
       await AsyncStorage.setItem(key, value);
     } catch (error) {
-      console.log('AsyncStorage Error: ' + error.message);
+      // console.log('AsyncStorage Error: ' + error.message);
     }
   },
 };

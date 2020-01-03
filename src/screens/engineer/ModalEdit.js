@@ -129,7 +129,9 @@ class ModalEdit extends Component {
       name: name.value,
       date_of_birth: date,
       no_contact: no_contact.value,
+      user_id: this.props.user.id,
       email: email.value,
+      old_photo: this.props.engineer.photo,
       location: location.value,
       skills: skills.value,
       specialist: specialist.value,
@@ -155,7 +157,7 @@ class ModalEdit extends Component {
       expected_salary.value
     ) {
       try {
-        await this.props.update(this.props.user.id, fd, config);
+        await this.props.update(this.props.user.id, data);
         Alert.alert(
           'Success!',
           'Update Profile Success!',
@@ -481,7 +483,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  update: (id, data, config) => dispatch(updateEngineer(id, data, config)),
+  update: (id, data) => dispatch(updateEngineer(id, data)),
 });
 // export default ModalEdit;
 export default connect(mapStateToProps, mapDispatchToProps)(ModalEdit);
