@@ -70,7 +70,6 @@ class ModalEdit extends Component {
       passwordError: '',
       loading: false,
       error: false,
-      date: new Date(this.props.engineer.date_of_birth),
       mode: 'date',
       show: false,
       name: this.props.engineer.name,
@@ -88,19 +87,7 @@ class ModalEdit extends Component {
     this.onInputChange = validationService.onInputChange.bind(this);
     this.getFormValidation = validationService.getFormValidation.bind(this);
     this.submit = this.submit.bind(this);
-
-    this.setDate = this.setDate.bind(this);
   }
-
-  setDate = (event, date) => {
-    date = date.toString().split('T')[0];
-    console.warn(date);
-    this.setState({
-      show: Platform.OS === 'ios' ? true : false,
-      date,
-      date_of_birth: date,
-    });
-  };
 
   show = mode => {
     this.setState({
@@ -124,13 +111,12 @@ class ModalEdit extends Component {
       specialist,
       description,
       expected_salary,
-      date,
       date_of_birth,
     } = this.state;
 
     const data = {
       name,
-      date_of_birth: date_of_birth.split('T')[0],
+      date_of_birth: date_of_birth.split('T')[0].toString(),
       no_contact,
       email,
       old_photo: this.props.engineer.photo,
@@ -152,7 +138,7 @@ class ModalEdit extends Component {
     };
     if (
       name &&
-      date &&
+      date_of_birth &&
       no_contact &&
       email &&
       location &&
@@ -178,7 +164,6 @@ class ModalEdit extends Component {
           {cancelable: false},
         );
       } catch (error) {
-        // console.log(error);
         const {messageError} = this.props;
         Alert.alert(
           'Failed!',
@@ -204,7 +189,7 @@ class ModalEdit extends Component {
   }
 
   render() {
-    const {show, mode, date} = this.state;
+    const {show, mode, date_of_birth} = this.state;
 
     const {engineer} = this.props;
     return (
@@ -264,21 +249,21 @@ class ModalEdit extends Component {
                   autoCapitalize="none"
                   returnKeyType="next"
                   defaultValue={
-                    engineer.date_of_birth
+                    date_of_birth
                       ? moment(
-                          engineer.date_of_birth.toString().split('T')[0],
+                          date_of_birth.toString().split('T')[0],
                           'YYYY-MM-DD',
                         ).format('D MMMM YYYY')
                       : ''
                   }
                   onTouchStart={this.datepicker}
-                  onChangeText={value => {
-                    this.onInputChange({id: 'date_of_birth', value});
-                    this.setState({date_of_birth: value});
-                  }}
-                  onSubmitEditing={val => {
-                    this.no_contact.focus();
-                  }}
+                  // onChangeText={value => {
+                  //   this.onInputChange({id: 'date_of_birth', value});
+                  //   // this.setState({date_of_birth: value});
+                  // }}
+                  // onSubmitEditing={val => {
+                  //   this.no_contact.focus();
+                  // }}
                 />
                 {this.renderError('date_of_birth')}
               </View>
@@ -434,11 +419,15 @@ class ModalEdit extends Component {
 
             {show && (
               <DateTimePicker
-                value={date}
+                value={new Date(date_of_birth)}
                 mode={mode}
                 is24Hour={true}
                 display="spinner"
-                onChange={this.setDate}
+                onChange={event => {
+                  const date = new Date(event.nativeEvent.timestamp);
+                  const dates = date.toISOString().split('T')[0];
+                  this.setState({date_of_birth: dates, show: false});
+                }}
               />
             )}
           </>

@@ -18,7 +18,11 @@ import {
 import {logout} from '../../public/redux/action/auth';
 import ImagePicker from 'react-native-image-picker';
 import moment from 'moment';
-import {updateEngineer} from '../../public/redux/action/engineers';
+import {
+  updateEngineer,
+  clearSingleEngineer,
+} from '../../public/redux/action/engineers';
+import {clearCompanies} from '../../public/redux/action/companies';
 
 class profile extends Component {
   constructor(props) {
@@ -26,7 +30,7 @@ class profile extends Component {
     this.state = {
       name: '',
       date_of_birth: '',
-      old_photo: '',
+      old_photo: this.props.engineer.photo,
       no_contact: '',
       email: '',
       location: '',
@@ -34,7 +38,9 @@ class profile extends Component {
       skills: '',
       specialist: '',
       expected_salary: '',
-      photo: '',
+      photo: `${config.BASE_URL}/engineers/${this.props.engineer.photo}`,
+      filename: '',
+      filesize: '',
       user_id: this.props.user.id,
       showcases: [],
       isUpload: false,
@@ -51,7 +57,6 @@ class profile extends Component {
         noData: true,
         mediaType: 'photo',
         allowsEditing: true,
-        quality: 0.7,
       },
       response => {
         console.log('response = ', response);
@@ -64,67 +69,77 @@ class profile extends Component {
         } else {
           this.setState({
             photo: response.uri,
+            filename: response.fileName,
+            filesize: response.fileSize,
           });
-          // this.uploadImage(response.uri);
+          const fileSize = response.fileSize;
+          const size = 1 * 1024 * 1024;
+          // const fileType = response.fileName.split('.')[1];
+          // console.warn(fileSize, size);
+          if (fileSize >= size) {
+            this.setState({
+              photo: `${config.BASE_URL}/engineers/${
+                this.props.engineer.photo
+              }`,
+            });
+            Alert.alert('File Too big, choose image under 1MB');
+          } else {
+            const fileType = response.fileName.split('.')[1];
+            this.uploadImage(response.uri, fileType);
+          }
         }
       },
     );
   };
 
-  uploadImage = async image_uri => {
+  uploadImage = async (image_uri, fileType) => {
+    this.setState({isUpload: true});
     const {engineer} = this.props;
-    // let base_url = '';
     let fd = new FormData();
-    fd.append('name', engineer.name);
-    fd.append('date_of_birth', engineer.date_of_birth);
-    fd.append('old_photo', engineer.this.props.engineer.photo);
-    fd.append('no_contact', engineer.no_contact);
-    fd.append('email', engineer.email);
-    fd.append('location', engineer.location);
-    fd.append('description', engineer.description);
-    fd.append('skills', engineer.skills);
-    fd.append('specialist', engineer.specialist);
-    fd.append('expected_salary', engineer.expected_salary);
+    fd.append('name', engineer.name ? engineer.name : '');
+    fd.append(
+      'date_of_birth',
+      engineer.date_of_birth ? engineer.date_of_birth.split('T')[0] : null,
+    );
+    fd.append('old_photo', engineer.photo);
+    fd.append('no_contact', engineer.no_contact ? engineer.no_contact : '');
+    fd.append('email', engineer.email ? engineer.email : '');
+    fd.append('location', engineer.location ? engineer.location : '');
+    fd.append('description', engineer.description ? engineer.description : '');
+    fd.append('skills', engineer.skills ? engineer.skills : '');
+    fd.append('specialist', engineer.specialist ? engineer.specialist : '');
+    fd.append(
+      'expected_salary',
+      engineer.expected_salary ? engineer.expected_salary : 0,
+    );
     fd.append('photo', {
-      type: 'image/*',
+      type: 'image/' + fileType,
       uri: image_uri,
-      name: 'uploadImageTmp.jpg',
+      name: 'engineer.' + fileType,
     });
-    const {token} = this.props;
+    const token = this.props.token.data.token;
     const configs = {
       headers: {
-        Accept: 'application/json',
-        // 'Content-Type': 'multipart/form-data',
+        'Content-Type': 'multipart/form-data',
         authorization: 'Bearer ' + token,
       },
     };
-    // await this.props.update(this.props.user.id, fd, configs);
-    // fetch(base_url, {
-    //   method: 'post',
-    //   body: fd,
-    // })
-    //   .then(response => {
-    //     response.json();
-    //   })
-    //   .then(response => {
-    //     if (response.status) {
-    //       this.setState({isUpload: false, avatar: base_url + response.image});
-    //     } else {
-    //       this.setState({isUpload: false});
-    //       Alert.alert('Error', response.message);
-    //     }
-    //   })
-    //   .catch(() => {
-    //     this.setState({isUpload: false});
-    //     Alert.alert('Error', 'Error on network');
-    //   });
+    await this.props
+      .update(this.props.user.id, fd, configs)
+      .then(() => {
+        this.setState({isUpload: false});
+      })
+      .catch(() => {
+        this.setState({isUpload: false});
+      });
+    // await this.props.fetch(this.props.user.id);
+    // this.setState({old_photo: engineer.photo});
   };
 
   render() {
     const {engineer} = this.props;
-    const photos = engineer.photo
-      ? `${config.BASE_URL}/engineers/${engineer.photo}`
-      : '';
+    const {photo} = this.state;
+    const photos = photo ? photo : null;
     const names = engineer.name ? engineer.name : '';
     const specialists = engineer.specialist ? engineer.specialist : '';
     const locations = engineer.location ? engineer.location : '';
@@ -132,7 +147,7 @@ class profile extends Component {
       ? moment(engineer.date_of_birth.split('T')[0], 'YYYY-MM-DD').format(
           'D MMMM YYYY',
         )
-      : '';
+      : null;
     const emails = engineer.email ? engineer.email : '';
     const no_contacts = engineer.no_contact ? engineer.no_contact : '';
     const skillss = engineer.skills ? engineer.skills : '';
@@ -147,13 +162,15 @@ class profile extends Component {
       <ScrollView>
         <View style={styles.container}>
           <View style={styles.header} />
-          {photos ? (
+          {engineer.photo ? (
             <Image style={styles.avatar} source={{uri: `${photos}`}} />
           ) : (
-            <Image
-              style={styles.avatar}
-              source={require('../../public/images/default.png')}
-            />
+            !engineer.photo && (
+              <Image
+                style={styles.avatar}
+                source={require('../../public/images/default.png')}
+              />
+            )
           )}
 
           <View style={styles.center}>
@@ -234,9 +251,14 @@ class profile extends Component {
                           {
                             text: 'OK',
                             onPress: async () => {
-                              await this.props.logout();
                               await this.props.navigation.popToTop();
-                              await this.props.delete(engineer.user_id);
+                              await this.props.delete(
+                                this.state.user_id,
+                                engineer.photo,
+                              );
+                              await this.props.logout();
+                              await this.props.clearEngineer(engineer.user_id);
+                              await this.props.clearCompanies();
                             },
                           },
                         ],
@@ -261,8 +283,10 @@ class profile extends Component {
                       {
                         text: 'Yes',
                         onPress: async () => {
+                          await this.props.navigation.popToTop();
+                          await this.props.clearEngineer();
+                          await this.props.clearCompanies();
                           await this.props.logout();
-                          this.props.navigation.popToTop();
                         },
                       },
                     ],
@@ -405,11 +429,14 @@ const mapStateToProps = state => ({
   engineer: state.singleEngineer.items,
   isLoading: state.singleEngineer,
   user: state.login.user,
+  token: state.login.items,
 });
 
 const mapDispatchToProps = dispatch => ({
+  clearEngineer: id => dispatch(clearSingleEngineer()),
+  clearCompanies: id => dispatch(clearCompanies()),
   fetch: id => dispatch(fetchSingleDataEngineer(id)),
-  delete: id => dispatch(deleteEngineer(id)),
+  delete: (id, photo) => dispatch(deleteEngineer(id, photo)),
   logout: id => dispatch(logout()),
   update: (id, data, configs) => dispatch(updateEngineer(id, data, configs)),
 });

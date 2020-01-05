@@ -29,6 +29,16 @@ const engineers = (state = initialState, action) => {
         isLoadMore: false,
         isError: false,
       };
+    case 'CLEAR_ENGINEERS':
+    case 'CLEAR_ENGINEERS_FULFILLED':
+      return {
+        ...state,
+        items: [],
+        pages: [],
+        isLoading: false,
+        isLoadMore: false,
+        isError: false,
+      };
     case 'FETCH_DATA_ENGINEERS_FULFILLED':
       return {
         ...state,

@@ -28,7 +28,18 @@ export const updateEngineer = (id, data, configs) => ({
   payload: axios.put(`${config.API_URL}/engineer/${id}`, data, configs),
 });
 
-export const deleteEngineer = id => ({
+export const deleteEngineer = (id, old_photo) => ({
   type: 'DELETE_DATA_ENGINEER',
-  payload: axios.delete(`${config.API_URL}/engineer/${id}`),
+  payload: axios.delete(`${config.API_URL}/engineer/${id}/${old_photo}`),
+  data: old_photo,
+});
+
+export const clearEngineers = data => ({
+  type: 'CLEAR_ENGINEERS',
+  payload: [],
+});
+
+export const clearSingleEngineer = data => ({
+  type: 'CLEAR_SINGLE_ENGINEER',
+  payload: [],
 });
