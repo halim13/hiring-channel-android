@@ -1,12 +1,12 @@
 import {createAppContainer} from 'react-navigation';
 import {createStackNavigator} from 'react-navigation-stack';
-import ProfileEngingeerScreen from '../../screens/engineer/profile';
+import ProfileEngineerScreen from '../../screens/engineer/profile';
 import EditProfileScreen from '../../screens/engineer/ModalEdit';
 
 const AppNavigator = createStackNavigator(
   {
-    ProfileEngingeer: {
-      screen: ProfileEngingeerScreen,
+    ProfileEngineer: {
+      screen: ProfileEngineerScreen,
       headerMode: 'none',
       navigationOptions: {
         headerShown: false,
@@ -20,7 +20,7 @@ const AppNavigator = createStackNavigator(
     },
   },
   {
-    initialRouteName: 'ProfileEngingeer',
+    initialRouteName: 'ProfileEngineer',
     defaultNavigationOptions: {
       headerStyle: {
         backgroundColor: '#008b6e',

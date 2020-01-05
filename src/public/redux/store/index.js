@@ -14,9 +14,9 @@ import rootReducer from '../reducers/index';
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  // blacklist: ['login', 'register', 'logout', 'companies', 'engineers'],
+  // blacklist: ['login'],
   whitelist: ['login'],
-  blacklist: ['register', 'logout', 'companies', 'engineers'],
+  // blacklist: ['register', 'logout', 'companies', 'engineers'],
 };
 
 // Middleware: Redux Persist Persisted Reducer

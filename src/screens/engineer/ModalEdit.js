@@ -16,7 +16,10 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import Spinner from 'react-native-loading-spinner-overlay';
 import moment from 'moment';
 import {connect} from 'react-redux';
-import {updateEngineer} from '../../public/redux/action/engineers';
+import {
+  updateEngineer,
+  fetchSingleDataEngineer,
+} from '../../public/redux/action/engineers';
 
 class ModalEdit extends Component {
   static navigationOptions = {
@@ -67,9 +70,19 @@ class ModalEdit extends Component {
       passwordError: '',
       loading: false,
       error: false,
-      date: new Date(),
+      date: new Date(this.props.engineer.date_of_birth),
       mode: 'date',
       show: false,
+      name: this.props.engineer.name,
+      showcases: this.props.engineer.showcases,
+      expected_salary: this.props.engineer.expected_salary,
+      description: this.props.engineer.description,
+      skills: this.props.engineer.skills,
+      specialist: this.props.engineer.specialist,
+      no_contact: this.props.engineer.no_contact,
+      email: this.props.engineer.email,
+      location: this.props.engineer.location,
+      date_of_birth: this.props.engineer.date_of_birth,
     };
 
     this.onInputChange = validationService.onInputChange.bind(this);
@@ -80,11 +93,12 @@ class ModalEdit extends Component {
   }
 
   setDate = (event, date) => {
-    date = date || this.state.date;
-
+    date = date.toString().split('T')[0];
+    console.warn(date);
     this.setState({
       show: Platform.OS === 'ios' ? true : false,
       date,
+      date_of_birth: date,
     });
   };
 
@@ -100,7 +114,7 @@ class ModalEdit extends Component {
   };
 
   async submit() {
-    this.getFormValidation();
+    await this.getFormValidation();
     const {
       name,
       no_contact,
@@ -110,54 +124,45 @@ class ModalEdit extends Component {
       specialist,
       description,
       expected_salary,
-    } = this.state.inputs;
-    const {date} = this.state;
-    let fd = new FormData();
-    fd.append('name', name.value);
-    fd.append('user_id', this.props.user.id);
-    fd.append('old_photo', this.props.engineer.photo);
-    fd.append('date_of_birth', date);
-    fd.append('no_contact', no_contact.value);
-    fd.append('email', email.value);
-    fd.append('location', location.value);
-    fd.append('skills', skills.value);
-    fd.append('specialist', specialist.value);
-    fd.append('description', description.value);
-    fd.append('expected_salary', expected_salary.value);
+      date,
+      date_of_birth,
+    } = this.state;
 
     const data = {
-      name: name.value,
-      date_of_birth: date,
-      no_contact: no_contact.value,
-      user_id: this.props.user.id,
-      email: email.value,
+      name,
+      date_of_birth: date_of_birth.split('T')[0],
+      no_contact,
+      email,
       old_photo: this.props.engineer.photo,
-      location: location.value,
-      skills: skills.value,
-      specialist: specialist.value,
-      description: description.value,
-      expected_salary: expected_salary.value,
+      photo: this.props.engineer.photo,
+      location,
+      skills,
+      specialist,
+      description,
+      expected_salary,
     };
-    const {token} = this.props.token;
+
+    const {token} = this.props;
     const config = {
       headers: {
-        'content-type': 'multipart/form-data',
+        Accept: 'application/json',
+        // 'Content-Type': 'multipart/form-data',
         authorization: 'Bearer ' + token,
       },
     };
     if (
-      name.value &&
+      name &&
       date &&
-      no_contact.value &&
-      email.value &&
-      location.value &&
-      skills.value &&
-      specialist.value &&
-      description.value &&
-      expected_salary.value
+      no_contact &&
+      email &&
+      location &&
+      skills &&
+      specialist &&
+      description &&
+      expected_salary
     ) {
       try {
-        await this.props.update(this.props.user.id, data);
+        await this.props.update(this.props.user.id, data, config);
         Alert.alert(
           'Success!',
           'Update Profile Success!',
@@ -165,13 +170,15 @@ class ModalEdit extends Component {
             {
               text: 'OK',
               onPress: () => {
-                this.props.navigation.navigate('ProfileEngingeer');
+                this.props.fetch(this.props.user.id);
+                this.props.navigation.navigate('ProfileEngineer');
               },
             },
           ],
           {cancelable: false},
         );
       } catch (error) {
+        // console.log(error);
         const {messageError} = this.props;
         Alert.alert(
           'Failed!',
@@ -188,8 +195,6 @@ class ModalEdit extends Component {
     }
   }
 
-  componentDidMount() {}
-
   renderError(id) {
     const {inputs} = this.state;
     if (inputs[id].errorLabel) {
@@ -199,7 +204,7 @@ class ModalEdit extends Component {
   }
 
   render() {
-    const {show, date, mode} = this.state;
+    const {show, mode, date} = this.state;
 
     const {engineer} = this.props;
     return (
@@ -218,13 +223,13 @@ class ModalEdit extends Component {
                 <Button
                   transparent
                   onPress={() => {
-                    this.props.navigation.navigate('ProfileEngingeer');
+                    this.props.navigation.navigate('ProfileEngineer');
                   }}>
                   <Icon name="arrow-back" />
                 </Button>
               </Left>
               <Body>
-                <Title>Edit Profile</Title>
+                <Title>Edit Profiles</Title>
               </Body>
               <Right />
             </Header>
@@ -236,11 +241,12 @@ class ModalEdit extends Component {
                   ref={el => (this.name = el)}
                   style={styles.textInput}
                   placeholder="Name"
-                  defaultValue={engineer.name}
+                  defaultValue={engineer.name ? engineer.name : ''}
                   autoCapitalize="none"
                   returnKeyType="next"
                   onChangeText={value => {
                     this.onInputChange({id: 'name', value});
+                    this.setState({name: value});
                   }}
                   onSubmitEditing={val => {
                     this.date_of_birth.focus();
@@ -257,13 +263,18 @@ class ModalEdit extends Component {
                   placeholder="Date Of Birth"
                   autoCapitalize="none"
                   returnKeyType="next"
-                  defaultValue={moment(
-                    engineer.date_of_birth.toString().split('T')[0],
-                    'YYYY-MM-DD',
-                  ).format('D MMMM YYYY')}
+                  defaultValue={
+                    engineer.date_of_birth
+                      ? moment(
+                          engineer.date_of_birth.toString().split('T')[0],
+                          'YYYY-MM-DD',
+                        ).format('D MMMM YYYY')
+                      : ''
+                  }
                   onTouchStart={this.datepicker}
                   onChangeText={value => {
                     this.onInputChange({id: 'date_of_birth', value});
+                    this.setState({date_of_birth: value});
                   }}
                   onSubmitEditing={val => {
                     this.no_contact.focus();
@@ -277,12 +288,13 @@ class ModalEdit extends Component {
                   ref={el => (this.no_contact = el)}
                   style={styles.textInput}
                   placeholder="No Contact"
-                  defaultValue={engineer.no_contact}
+                  defaultValue={engineer.no_contact ? engineer.no_contact : ''}
                   autoCapitalize="none"
                   returnKeyType="next"
                   keyboardType="number-pad"
                   onChangeText={value => {
                     this.onInputChange({id: 'no_contact', value});
+                    this.setState({no_contact: value});
                   }}
                   onSubmitEditing={val => {
                     this.email.focus();
@@ -296,12 +308,13 @@ class ModalEdit extends Component {
                   ref={el => (this.email = el)}
                   style={styles.textInput}
                   placeholder="Email"
-                  defaultValue={engineer.email}
+                  defaultValue={engineer.email ? engineer.email : ''}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   returnKeyType="next"
                   onChangeText={value => {
                     this.onInputChange({id: 'email', value});
+                    this.setState({email: value});
                   }}
                   onSubmitEditing={val => {
                     this.location.focus();
@@ -316,10 +329,11 @@ class ModalEdit extends Component {
                   style={styles.textInput}
                   placeholder="Location"
                   autoCapitalize="none"
-                  defaultValue={engineer.location}
+                  defaultValue={engineer.location ? engineer.location : ''}
                   returnKeyType="next"
                   onChangeText={value => {
                     this.onInputChange({id: 'location', value});
+                    this.setState({location: value});
                   }}
                   onSubmitEditing={val => {
                     this.skills.focus();
@@ -334,10 +348,11 @@ class ModalEdit extends Component {
                   style={styles.textInput}
                   placeholder="Skills"
                   autoCapitalize="none"
-                  defaultValue={engineer.skills}
+                  defaultValue={engineer.skills ? engineer.skills : ''}
                   returnKeyType="next"
                   onChangeText={value => {
                     this.onInputChange({id: 'skills', value});
+                    this.setState({skills: value});
                   }}
                   onSubmitEditing={val => {
                     this.specialist.focus();
@@ -352,10 +367,11 @@ class ModalEdit extends Component {
                   style={styles.textInput}
                   placeholder="Specialist"
                   autoCapitalize="none"
-                  defaultValue={engineer.specialist}
+                  defaultValue={engineer.specialist ? engineer.specialist : ''}
                   returnKeyType="next"
                   onChangeText={value => {
                     this.onInputChange({id: 'specialist', value});
+                    this.setState({specialist: value});
                   }}
                   onSubmitEditing={val => {
                     this.description.focus();
@@ -370,10 +386,13 @@ class ModalEdit extends Component {
                   style={styles.textInput}
                   placeholder="Description"
                   autoCapitalize="none"
-                  defaultValue={engineer.description}
+                  defaultValue={
+                    engineer.description ? engineer.description : ''
+                  }
                   returnKeyType="next"
                   onChangeText={value => {
                     this.onInputChange({id: 'description', value});
+                    this.setState({description: value});
                   }}
                   onSubmitEditing={val => {
                     this.expected_salary.focus();
@@ -388,11 +407,16 @@ class ModalEdit extends Component {
                   style={styles.textInput}
                   placeholder="Expected Salary"
                   keyboardType="number-pad"
-                  defaultValue={engineer.expected_salary.toString()}
+                  defaultValue={
+                    engineer.expected_salary
+                      ? engineer.expected_salary.toString()
+                      : ''
+                  }
                   autoCapitalize="none"
                   returnKeyType="send"
                   onChangeText={value => {
                     this.onInputChange({id: 'expected_salary', value});
+                    this.setState({expected_salary: value});
                   }}
                   onSubmitEditing={val => {
                     // this.password.focus();
@@ -483,7 +507,11 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  update: (id, data) => dispatch(updateEngineer(id, data)),
+  fetch: id => dispatch(fetchSingleDataEngineer(id)),
+  update: (id, data, config) => dispatch(updateEngineer(id, data, config)),
 });
 // export default ModalEdit;
-export default connect(mapStateToProps, mapDispatchToProps)(ModalEdit);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(ModalEdit);

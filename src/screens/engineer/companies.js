@@ -24,6 +24,7 @@ import ListCards from '../../components/Lists';
 import _ from 'lodash';
 import {connect} from 'react-redux';
 import {fetchDataCompanies} from '../../public/redux/action/companies';
+import {fetchSingleDataEngineer} from '../../public/redux/action/engineers';
 
 class HeaderMultipleIconExample extends Component {
   constructor() {
@@ -36,6 +37,7 @@ class HeaderMultipleIconExample extends Component {
 
   componentDidMount() {
     this.props.fetch('', 'name', 'asc', 1, 5);
+    this.props.fetchEngineer(this.props.user.id);
   }
 
   search = async search => {
@@ -229,11 +231,13 @@ const mapStateToProps = state => ({
   pages: state.companies.pages,
   isLoading: state.companies.isLoading,
   isError: state.companies.isError,
+  user: state.login.user,
 });
 
 const mapDispatchToProps = dispatch => ({
   fetch: (search, sort, order, page, limit) =>
     dispatch(fetchDataCompanies(search, sort, order, page, limit)),
+  fetchEngineer: id => dispatch(fetchSingleDataEngineer(id)),
 });
 export default connect(
   mapStateToProps,

@@ -24,7 +24,7 @@ const singleEngineers = (state = initialState, action) => {
     case 'UPDATE_DATA_ENGINEER_FULFILLED':
       return {
         ...state,
-        items: action.payload.data.engineersData[0],
+        items: action.payload.data[0].data,
         isLoading: false,
         messageError: '',
       };

@@ -46,7 +46,7 @@ class FormLogin extends Component {
     this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     BackHandler.addEventListener(
       'hardwareBackPress',
       this.handleBackButtonClick,

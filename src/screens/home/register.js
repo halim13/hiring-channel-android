@@ -150,14 +150,14 @@ class FormSignUp extends Component {
     }
     return null;
   }
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     BackHandler.addEventListener(
       'hardwareBackPress',
       this.handleBackButtonClick,
     );
   }
 
-  componentWillUnmount() {
+  UNSAFE_componentWillUnmount() {
     BackHandler.removeEventListener(
       'hardwareBackPress',
       this.handleBackButtonClick,

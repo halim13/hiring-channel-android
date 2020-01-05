@@ -7,80 +7,197 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import config from '../../public/config/config';
 import {connect} from 'react-redux';
 import {
-  fetchSingleData,
+  fetchSingleDataEngineer,
   deleteEngineer,
 } from '../../public/redux/action/engineers';
 import {logout} from '../../public/redux/action/auth';
-import defaultPhoto from '../../public/images/default.png';
+import ImagePicker from 'react-native-image-picker';
 import moment from 'moment';
+import {updateEngineer} from '../../public/redux/action/engineers';
 
 class profile extends Component {
-  constructor() {
-    super();
-    this.state = {};
+  constructor(props) {
+    super(props);
+    this.state = {
+      name: '',
+      date_of_birth: '',
+      old_photo: '',
+      no_contact: '',
+      email: '',
+      location: '',
+      description: '',
+      skills: '',
+      specialist: '',
+      expected_salary: '',
+      photo: '',
+      user_id: this.props.user.id,
+      showcases: [],
+      isUpload: false,
+    };
   }
 
   componentDidMount() {
     this.props.fetch(this.props.user.id);
   }
+
+  selectImage = async () => {
+    ImagePicker.showImagePicker(
+      {
+        noData: true,
+        mediaType: 'photo',
+        allowsEditing: true,
+        quality: 0.7,
+      },
+      response => {
+        console.log('response = ', response);
+        if (response.didCancel) {
+          console.log('user cancelled image picker');
+        } else if (response.error) {
+          console.log('ImagePicker error: ', response.error);
+        } else if (response.customButton) {
+          console.log('user tapped custom button', response.customButton);
+        } else {
+          this.setState({
+            photo: response.uri,
+          });
+          // this.uploadImage(response.uri);
+        }
+      },
+    );
+  };
+
+  uploadImage = async image_uri => {
+    const {engineer} = this.props;
+    // let base_url = '';
+    let fd = new FormData();
+    fd.append('name', engineer.name);
+    fd.append('date_of_birth', engineer.date_of_birth);
+    fd.append('old_photo', engineer.this.props.engineer.photo);
+    fd.append('no_contact', engineer.no_contact);
+    fd.append('email', engineer.email);
+    fd.append('location', engineer.location);
+    fd.append('description', engineer.description);
+    fd.append('skills', engineer.skills);
+    fd.append('specialist', engineer.specialist);
+    fd.append('expected_salary', engineer.expected_salary);
+    fd.append('photo', {
+      type: 'image/*',
+      uri: image_uri,
+      name: 'uploadImageTmp.jpg',
+    });
+    const {token} = this.props;
+    const configs = {
+      headers: {
+        Accept: 'application/json',
+        // 'Content-Type': 'multipart/form-data',
+        authorization: 'Bearer ' + token,
+      },
+    };
+    // await this.props.update(this.props.user.id, fd, configs);
+    // fetch(base_url, {
+    //   method: 'post',
+    //   body: fd,
+    // })
+    //   .then(response => {
+    //     response.json();
+    //   })
+    //   .then(response => {
+    //     if (response.status) {
+    //       this.setState({isUpload: false, avatar: base_url + response.image});
+    //     } else {
+    //       this.setState({isUpload: false});
+    //       Alert.alert('Error', response.message);
+    //     }
+    //   })
+    //   .catch(() => {
+    //     this.setState({isUpload: false});
+    //     Alert.alert('Error', 'Error on network');
+    //   });
+  };
+
   render() {
     const {engineer} = this.props;
-    const photo = engineer.photo
+    const photos = engineer.photo
       ? `${config.BASE_URL}/engineers/${engineer.photo}`
-      : defaultPhoto;
-    const name = engineer.name ? engineer.name : '';
-    const specialist = engineer.specialist ? engineer.specialist : '';
-    const location = engineer.location ? engineer.location : '';
-    const date_of_birth = engineer.date_of_birth
+      : '';
+    const names = engineer.name ? engineer.name : '';
+    const specialists = engineer.specialist ? engineer.specialist : '';
+    const locations = engineer.location ? engineer.location : '';
+    const date_of_births = engineer.date_of_birth
       ? moment(engineer.date_of_birth.split('T')[0], 'YYYY-MM-DD').format(
           'D MMMM YYYY',
         )
       : '';
-    const email = engineer.email ? engineer.email : '';
-    const no_contact = engineer.no_contact ? engineer.no_contact : '';
-    const skills = engineer.skills ? engineer.skills : '';
-    const expected_salary = engineer.expected_salary
+    const emails = engineer.email ? engineer.email : '';
+    const no_contacts = engineer.no_contact ? engineer.no_contact : '';
+    const skillss = engineer.skills ? engineer.skills : '';
+    const expected_salarys = engineer.expected_salary
       ? engineer.expected_salary
           .toString()
           .replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
       : '';
-    const description = engineer.description ? engineer.description : '';
+    const descriptions = engineer.description ? engineer.description : '';
     const showcase = engineer.showcases ? engineer.showcases : [];
     return (
       <ScrollView>
         <View style={styles.container}>
           <View style={styles.header} />
-          <Image style={styles.avatar} source={{uri: `${photo}`}} />
+          {photos ? (
+            <Image style={styles.avatar} source={{uri: `${photos}`}} />
+          ) : (
+            <Image
+              style={styles.avatar}
+              source={require('../../public/images/default.png')}
+            />
+          )}
+
+          <View style={styles.center}>
+            {!this.state.isUpload && (
+              <TouchableOpacity
+                style={styles.changeImage}
+                onPress={this.selectImage}>
+                <Text style={styles.imageText}>Change Image</Text>
+              </TouchableOpacity>
+            )}
+            {this.state.isUpload && (
+              <View style={styles.changeImage}>
+                <ActivityIndicator />
+              </View>
+            )}
+          </View>
           <View style={styles.body}>
             <View style={styles.bodyContent}>
-              <Text style={styles.name}>{name}</Text>
-              <Text style={styles.info}>{specialist}</Text>
+              <Text style={styles.name}>{names}</Text>
+              <Text style={styles.info}>{specialists}</Text>
               <View style={styles.row}>
-                <Text style={styles.text}>Location : {location}</Text>
-              </View>
-              <View style={styles.row}>
-                <Text style={styles.text}>Date of Birth : {date_of_birth}</Text>
-              </View>
-              <View style={styles.row}>
-                <Text style={styles.text}>Contact : {no_contact}</Text>
-              </View>
-              <View style={styles.row}>
-                <Text style={styles.text}>Email : {email}</Text>
-              </View>
-              <View style={styles.row}>
-                <Text style={styles.text}>Skills: {skills}</Text>
+                <Text style={styles.text}>Location : {locations}</Text>
               </View>
               <View style={styles.row}>
                 <Text style={styles.text}>
-                  Expected Salary: Rp. {expected_salary}
+                  Date of Birth : {date_of_births}
+                </Text>
+              </View>
+              <View style={styles.row}>
+                <Text style={styles.text}>Contact : {no_contacts}</Text>
+              </View>
+              <View style={styles.row}>
+                <Text style={styles.text}>Email : {emails}</Text>
+              </View>
+              <View style={styles.row}>
+                <Text style={styles.text}>Skills: {skillss}</Text>
+              </View>
+              <View style={styles.row}>
+                <Text style={styles.text}>
+                  Expected Salary: Rp. {expected_salarys}
                 </Text>
               </View>
               <Text style={styles.description}>
-                Description : {description}
+                Description : {descriptions}
               </Text>
               <Text style={styles.textCenter}>Showcase</Text>
 
@@ -98,7 +215,7 @@ class profile extends Component {
                   <TouchableOpacity
                     style={styles.buttonContainerEdit}
                     onPress={() => {
-                      this.props.navigation.navigate('EditProfileEngineer');
+                      this.props.navigation.push('EditProfileEngineer');
                     }}>
                     <Text style={styles.textButton}>Edit Profile</Text>
                   </TouchableOpacity>
@@ -118,10 +235,8 @@ class profile extends Component {
                             text: 'OK',
                             onPress: async () => {
                               await this.props.logout();
-                              await this.props.delete(
-                                this.props.engineer.user_id,
-                              );
-                              this.props.navigation.popToTop();
+                              await this.props.navigation.popToTop();
+                              await this.props.delete(engineer.user_id);
                             },
                           },
                         ],
@@ -141,13 +256,11 @@ class profile extends Component {
                     [
                       {
                         text: 'No',
-                        // onPress: () => console.log('No Pressed'),
                         style: 'cancel',
                       },
                       {
                         text: 'Yes',
                         onPress: async () => {
-                          // console.log('Yes Pressed');
                           await this.props.logout();
                           this.props.navigation.popToTop();
                         },
@@ -183,7 +296,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   body: {
-    marginTop: 40,
+    marginTop: 80,
   },
   bodyContent: {
     flex: 1,
@@ -273,6 +386,19 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     marginTop: 5,
   },
+  changeImage: {
+    top: 75,
+    position: 'absolute',
+    alignSelf: 'center',
+    backgroundColor: '#ddd',
+    padding: 6,
+    borderRadius: 20,
+  },
+  imageText: {
+    color: '#333',
+    fontSize: 13,
+    fontWeight: 'bold',
+  },
 });
 
 const mapStateToProps = state => ({
@@ -282,9 +408,10 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  fetch: id => dispatch(fetchSingleData(id)),
+  fetch: id => dispatch(fetchSingleDataEngineer(id)),
   delete: id => dispatch(deleteEngineer(id)),
   logout: id => dispatch(logout()),
+  update: (id, data, configs) => dispatch(updateEngineer(id, data, configs)),
 });
 export default connect(
   mapStateToProps,

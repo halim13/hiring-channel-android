@@ -340,4 +340,7 @@ const mapDispatchToProps = dispatch => ({
   update: (id, data, config) => dispatch(updateCompany(id, data, config)),
 });
 // export default ModalEdit;
-export default connect(mapStateToProps, mapDispatchToProps)(ModalEdit);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(ModalEdit);

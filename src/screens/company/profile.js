@@ -103,7 +103,7 @@ class profile extends Component {
                       {
                         text: 'Yes',
                         onPress: async () => {
-                          console.log('Yes Pressed');
+                          // console.log('Yes Pressed');
                           await this.props.logout();
                           this.props.navigation.popToTop();
                         },

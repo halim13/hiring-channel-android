@@ -18,18 +18,14 @@ export const load = (search, sort, order, page, limit) => ({
   ),
 });
 
-export const fetchSingleData = id => ({
+export const fetchSingleDataEngineer = id => ({
   type: 'FETCH_SINGLE_DATA_ENGINEER',
   payload: axios.get(`${config.API_URL}/engineer/${id}`),
 });
 
-export const updateEngineer = (id, data) => ({
+export const updateEngineer = (id, data, configs) => ({
   type: 'UPDATE_DATA_ENGINEER',
-  payload: axios.put(`${config.API_URL}/engineer/${id}`, data, {
-    headers: {
-      'content-type': 'multipart/form-data',
-    },
-  }),
+  payload: axios.put(`${config.API_URL}/engineer/${id}`, data, configs),
 });
 
 export const deleteEngineer = id => ({
