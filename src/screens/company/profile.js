@@ -17,11 +17,109 @@ import {connect} from 'react-redux';
 import config from '../../public/config/config';
 import {logout} from '../../public/redux/action/auth';
 import defaultPhoto from '../../public/images/default.png';
+import ImagePicker from 'react-native-image-picker';
+import {
+  updateEngineer,
+  clearSingleEngineer,
+} from '../../public/redux/action/companies';
+import {clearEngineers} from '../../public/redux/action/engineers';
 
 class profile extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      name: '',
+      old_logo: this.props.company.logo,
+      no_contact: '',
+      email: '',
+      location: '',
+      description: '',
+      logo: `${config.BASE_URL}/companies/${this.props.company.logo}`,
+      filename: '',
+      filesize: '',
+      user_id: this.props.user.id,
+      showcases: [],
+      isUpload: false,
+    };
+  }
   componentDidMount() {
     this.props.fetch(this.props.user.id);
   }
+  selectImage = async () => {
+    ImagePicker.showImagePicker(
+      {
+        noData: true,
+        mediaType: 'photo',
+        allowsEditing: true,
+      },
+      response => {
+        console.log('response = ', response);
+        if (response.didCancel) {
+          console.log('user cancelled image picker');
+        } else if (response.error) {
+          console.log('ImagePicker error: ', response.error);
+        } else if (response.customButton) {
+          console.log('user tapped custom button', response.customButton);
+        } else {
+          this.setState({
+            logo: response.uri,
+            filename: response.fileName,
+            filesize: response.fileSize,
+          });
+          const fileSize = response.fileSize;
+          const size = 1 * 1024 * 1024;
+          if (fileSize >= size) {
+            this.setState({
+              photo: `${config.BASE_URL}/companies/${this.props.company.logo}`,
+            });
+            Alert.alert('File Too big, choose image under 1MB');
+          } else {
+            const fileType = response.fileName.split('.')[1];
+            this.uploadImage(response.uri, fileType);
+          }
+        }
+      },
+    );
+  };
+
+  uploadImage = async (image_uri, fileType) => {
+    this.setState({isUpload: true});
+    const {company} = this.props;
+    let fd = new FormData();
+    fd.append('name', company.name ? company.name : '');
+    fd.append(
+      'date_of_birth',
+      company.date_of_birth ? company.date_of_birth.split('T')[0] : null,
+    );
+    fd.append('old_logo', company.photo);
+    fd.append('no_contact', company.no_contact ? company.no_contact : '');
+    fd.append('email', company.email ? company.email : '');
+    fd.append('location', company.location ? company.location : '');
+    fd.append('description', company.description ? company.description : '');
+    fd.append('logo', {
+      type: 'image/' + fileType,
+      uri: image_uri,
+      name: 'company.' + fileType,
+    });
+    const token = this.props.token.data.token;
+    const configs = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        authorization: 'Bearer ' + token,
+      },
+    };
+    await this.props
+      .update(this.props.user.id, fd, configs)
+      .then(() => {
+        this.setState({isUpload: false});
+      })
+      .catch(() => {
+        this.setState({isUpload: false});
+      });
+    // await this.props.fetch(this.props.user.id);
+    // this.setState({old_logo: engineer.photo});
+  };
+
   render() {
     const {company} = this.props;
     const photo = company.logo

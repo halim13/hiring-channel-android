@@ -2,17 +2,23 @@ const initialState = {
   items: [],
   pages: [],
   isLoading: false,
+  isLoadMore: false,
   isError: false,
 };
 
 const engineers = (state = initialState, action) => {
   switch (action.type) {
     case 'FETCH_DATA_COMPANIES_PENDING':
-    case 'FETCH_MORE_DATA_COMPANIES_PENDING':
     case 'CLEAR_COMPANIES_PENDING':
       return {
         ...state,
         isLoading: true,
+      };
+
+    case 'FETCH_LOAD_MORE_DATA_COMPANIES_PENDING':
+      return {
+        ...state,
+        isLoadMore: true,
       };
     case 'FETCH_DATA_COMPANIES_FULFILLED':
       return {
@@ -22,7 +28,7 @@ const engineers = (state = initialState, action) => {
         isLoading: false,
         isError: false,
       };
-    case 'FETCH_LOAD_DATA_COMPANIES_FULFILLED':
+    case 'FETCH_LOAD_MORE_DATA_COMPANIES_FULFILLED':
       return {
         ...state,
         items: [...state.items, ...action.payload.data.data[0].data],
@@ -40,12 +46,18 @@ const engineers = (state = initialState, action) => {
         isError: false,
       };
     case 'FETCH_DATA_COMPANIES_REJECTED':
-    case 'FETCH_MORE_DATA_COMPANIES_REJECTED':
     case 'CLEAR_COMPANIES_REJECTED':
       return {
         ...state,
         isLoading: false,
         isError: true,
+      };
+    case 'FETCH_LOAD_MORE_DATA_COMPANIES_REJECTED':
+      return {
+        ...state,
+        isLoading: false,
+        isError: true,
+        isLoadMore: false,
       };
     default:
       return state;

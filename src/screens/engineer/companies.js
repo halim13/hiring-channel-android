@@ -19,11 +19,16 @@ import {
   ActivityIndicator,
   FlatList,
   TouchableOpacity,
+  BackHandler,
+  RefreshControl,
 } from 'react-native';
 import ListCards from '../../components/Lists';
 import _ from 'lodash';
 import {connect} from 'react-redux';
-import {fetchDataCompanies} from '../../public/redux/action/companies';
+import {
+  fetchDataCompanies,
+  loadMore,
+} from '../../public/redux/action/companies';
 import {fetchSingleDataEngineer} from '../../public/redux/action/engineers';
 
 class HeaderMultipleIconExample extends Component {
@@ -31,11 +36,29 @@ class HeaderMultipleIconExample extends Component {
     super();
     this.state = {
       showSearch: false,
+      loadData: false,
+      isFetching: false,
     };
     this.search = _.debounce(this.search, 1000);
   }
+  onRefresh() {
+    this.setState({isFetching: true}, async () => {
+      await this.props.fetch(
+        this.props.pages.search,
+        this.props.pages.sort,
+        this.props.pages.order,
+        1,
+        this.props.pages.limit,
+      );
+      this.setState({isFetching: false});
+    });
+  }
 
   componentDidMount() {
+    // this.backHandler = BackHandler.addEventListener("hardwareBackPress", () => {
+    //   // Alert.alert("Logout", "Are you sure you want to logout?", [{ text: "Cancel", onPress: () => {}, style: "cancel" }, { text: "Logout", onPress: () => this.handleLogout() }], { cancelable: false });
+    //   return true;
+    // });
     this.props.fetch('', 'name', 'asc', 1, 5);
     this.props.fetchEngineer(this.props.user.id);
   }
@@ -103,9 +126,45 @@ class HeaderMultipleIconExample extends Component {
       );
     }
   };
+  renderFooter() {
+    return (
+      <View style={styles.footer}>
+        {parseInt(this.props.pages.page, 10) !==
+        parseInt(this.props.pages.totalPage, 10) ? (
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={this.loadMoreData}
+            style={styles.loadMoreBtn}>
+            <Text style={styles.btnText}>Load More</Text>
+            {this.state.loadData ? (
+              <ActivityIndicator color="white" style={{ marginLeft: 8 }} />
+            ) : null}
+          </TouchableOpacity>
+        ) : (
+          <></>
+        )}
+      </View>
+    );
+  }
+  loadMoreData = async () => {
+    const {pages} = this.props;
+    const page =
+      pages.page === pages.totalPage
+        ? pages.totalPage
+        : parseInt(pages.page, 10) + 1;
+    this.setState({loadData: true});
+    await this.props.loadMore(
+      pages.search,
+      pages.sort,
+      pages.order,
+      page,
+      pages.limit,
+    );
+    this.setState({loadData: false});
+  };
 
   render() {
-    const {showSearch} = this.state;
+    const {showSearch, isFetching} = this.state;
     const {isLoading, isError, companies, pages} = this.props;
     return (
       <Container>
@@ -186,7 +245,7 @@ class HeaderMultipleIconExample extends Component {
         )}
 
         <View style={styles.seriesContainer}>
-          {isLoading ? (
+          {isLoading && isFetching ? (
             <ActivityIndicator color="#DEAA9B" size="large" />
           ) : isError ? (
             <Text style={styles.text}>Error, please try again</Text>
@@ -196,12 +255,25 @@ class HeaderMultipleIconExample extends Component {
               another keyword
             </Text>
           ) : (
-            <FlatList
-              style={styles.flatList}
-              data={companies}
-              renderItem={({item}) => <ListCards item={item} />}
-              keyExtractor={item => item.id.toString()}
-            />
+            <>
+              <FlatList
+                style={
+                  this.state.showSearch
+                    ? styles.flatListShowSearch
+                    : styles.flatList
+                }
+                refreshControl={
+                  <RefreshControl
+                    onRefresh={() => this.onRefresh()}
+                    refreshing={this.state.isFetching}
+                  />
+                }
+                data={companies}
+                renderItem={({item}) => <ListCards item={item} />}
+                keyExtractor={item => item.id.toString()}
+                ListFooterComponent={this.renderFooter.bind(this)}
+              />
+            </>
           )}
         </View>
       </Container>
@@ -224,6 +296,26 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
   },
   flatList: {marginBottom: 50},
+  flatListShowSearch: {marginBottom: 100},
+  footer: {
+    padding: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  loadMoreBtn: {
+    padding: 10,
+    backgroundColor: '#800000',
+    borderRadius: 4,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  btnText: {
+    color: 'white',
+    fontSize: 15,
+    textAlign: 'center',
+  },
 });
 
 const mapStateToProps = state => ({
@@ -237,6 +329,8 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   fetch: (search, sort, order, page, limit) =>
     dispatch(fetchDataCompanies(search, sort, order, page, limit)),
+  loadMore: (search, sort, order, page, limit) =>
+    dispatch(loadMore(search, sort, order, page, limit)),
   fetchEngineer: id => dispatch(fetchSingleDataEngineer(id)),
 });
 export default connect(

@@ -9,8 +9,9 @@ export const fetchData = (search, sort, order, page, limit) => ({
     }/engineers/?search=${search}&sort=${sort}&order=${order}&page=${page}&limit=${limit}`,
   ),
 });
-export const load = (search, sort, order, page, limit) => ({
-  type: 'FETCH_LOAD_DATA_ENGINEERS',
+
+export const loadMore = (search, sort, order, page, limit) => ({
+  type: 'FETCH_LOAD_MORE_DATA_ENGINEERS',
   payload: axios.get(
     `${
       config.API_URL

@@ -9,8 +9,9 @@ export const fetchDataCompanies = (search, sort, order, page, limit) => ({
     }/companies/?search=${search}&sort=${sort}&order=${order}&page=${page}&limit=${limit}`,
   ),
 });
-export const load = (search, sort, order, page, limit) => ({
-  type: 'FETCH_LOAD_DATA_COMPANIES',
+
+export const loadMore = (search, sort, order, page, limit) => ({
+  type: 'FETCH_LOAD_MORE_DATA_COMPANIES',
   payload: axios.get(
     `${
       config.API_URL

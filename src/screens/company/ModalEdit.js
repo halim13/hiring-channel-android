@@ -69,17 +69,12 @@ class ModalEdit extends Component {
   async submit() {
     this.getFormValidation();
     const {name, no_contact, email, location, description} = this.state.inputs;
-    let fd = new FormData();
-    fd.append('name', name.value);
-    fd.append('user_id', this.props.user.id);
-    fd.append('old_photo', this.props.company.logo);
-    fd.append('no_contact', no_contact.value);
-    fd.append('email', email.value);
-    fd.append('location', location.value);
-    fd.append('description', description.value);
+    // const {old_photo} = this.state;
 
     const data = {
       name: name.value,
+      old_logo: this.props.company.logo,
+      // logo: this.props.company.logo,
       no_contact: no_contact.value,
       email: email.value,
       location: location.value,
@@ -88,19 +83,21 @@ class ModalEdit extends Component {
     const {token} = this.props.token;
     const config = {
       headers: {
-        'content-type': 'multipart/form-data',
+        Accept: 'application/json',
+        // 'content-type': 'multipart/form-data',
         authorization: 'Bearer ' + token,
       },
     };
     if (
       name.value &&
       no_contact.value &&
+      no_contact.value.length > 10 &&
       email.value &&
       location.value &&
       description.value
     ) {
       try {
-        await this.props.update(this.props.user.id, fd, config);
+        await this.props.update(this.props.user.id, data, config);
         Alert.alert(
           'Success!',
           'Update Profile Success!',
@@ -184,8 +181,7 @@ class ModalEdit extends Component {
                     this.onInputChange({id: 'name', value});
                   }}
                   onSubmitEditing={val => {
-                    this.date_of_birth.focus();
-                    this.datepicker();
+                    this.no_contact.focus();
                   }}
                 />
                 {this.renderError('name')}
@@ -241,7 +237,7 @@ class ModalEdit extends Component {
                     this.onInputChange({id: 'location', value});
                   }}
                   onSubmitEditing={val => {
-                    this.skills.focus();
+                    this.description.focus();
                   }}
                 />
                 {this.renderError('location')}
@@ -253,13 +249,12 @@ class ModalEdit extends Component {
                   style={styles.textInput}
                   placeholder="Description"
                   autoCapitalize="none"
+                  multiline={true}
+                  height={100}
                   defaultValue={company.description}
-                  returnKeyType="next"
+                  returnKeyType="done"
                   onChangeText={value => {
                     this.onInputChange({id: 'description', value});
-                  }}
-                  onSubmitEditing={val => {
-                    this.expected_salary.focus();
                   }}
                 />
                 {this.renderError('description')}

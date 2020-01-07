@@ -19,23 +19,26 @@ import {
   ActivityIndicator,
   FlatList,
   TouchableOpacity,
+  RefreshControl,
 } from 'react-native';
 import ListCardsEngineers from '../../components/ListsEngineers';
 import _ from 'lodash';
 import {connect} from 'react-redux';
-import {fetchData, load} from '../../public/redux/action/engineers';
+import {fetchData, loadMore} from '../../public/redux/action/engineers';
 
 class Engineers extends Component {
   constructor() {
     super();
     this.state = {
       showSearch: false,
+      loadData: false,
+      isFetching: false,
     };
     this.search = _.debounce(this.search, 1000);
   }
 
   componentDidMount() {
-    this.props.fetch('', 'name', 'asc', 1, 7);
+    this.props.fetch('', 'name', 'asc', 1, 5);
   }
 
   search = async search => {
@@ -123,41 +126,58 @@ class Engineers extends Component {
       );
     }
   };
-  renderFooter = () => {
-    return this.props.isLoadMore ? (
-      <View style={styles.load}>
-        <ActivityIndicator size="large" />
-      </View>
-    ) : null;
-  };
 
-  loadMore = async () => {
+  onRefresh() {
+    this.setState({isFetching: true}, async () => {
+      await this.props.fetch(
+        this.props.pages.search,
+        this.props.pages.sort,
+        this.props.pages.order,
+        1,
+        this.props.pages.limit,
+      );
+      this.setState({isFetching: false});
+    });
+  }
+  renderFooter() {
+    return (
+      <View style={styles.footer}>
+        {parseInt(this.props.pages.page, 10) !==
+        parseInt(this.props.pages.totalPage, 10) ? (
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={this.loadMoreData}
+            style={styles.loadMoreBtn}>
+            <Text style={styles.btnText}>Load More</Text>
+            {this.state.loadData ? (
+              <ActivityIndicator color="white" style={{ marginLeft: 8 }} />
+            ) : null}
+          </TouchableOpacity>
+        ) : (
+          <></>
+        )}
+      </View>
+    );
+  }
+  loadMoreData = async () => {
     const {pages} = this.props;
-    if (parseInt(pages.page, 10) !== parseInt(pages.totalPage, 10)) {
-      try {
-        const page = parseInt(pages.page, 10) + 1;
-        await this.props.load(
-          pages.search,
-          pages.sort,
-          pages.order,
-          page,
-          pages.limit,
-        );
-      } catch (err) {
-        return Alert.alert(
-          'Error',
-          'Error connecting to the server, please try again later',
-          [{text: 'OK'}],
-          {
-            cancelable: false,
-          },
-        );
-      }
-    }
+    const page =
+      pages.page === pages.totalPage
+        ? pages.totalPage
+        : parseInt(pages.page, 10) + 1;
+    this.setState({loadData: true});
+    await this.props.loadMore(
+      pages.search,
+      pages.sort,
+      pages.order,
+      page,
+      pages.limit,
+    );
+    this.setState({loadData: false});
   };
 
   render() {
-    const {showSearch} = this.state;
+    const {showSearch, isFetching} = this.state;
     const {isLoading, isError, engineers, pages} = this.props;
     return (
       <Container>
@@ -205,6 +225,7 @@ class Engineers extends Component {
                 <Picker.Item label="DESC[Z-A]" value="desc" />
               </Picker>
               <Input
+                defaultValue={this.props.pages.limit}
                 placeholder="Limit"
                 returnKeyType="go"
                 keyboardType="number-pad"
@@ -238,7 +259,7 @@ class Engineers extends Component {
         )}
 
         <View style={styles.seriesContainer}>
-          {isLoading ? (
+          {isLoading && isFetching ? (
             <ActivityIndicator color="#DEAA9B" size="large" />
           ) : isError ? (
             <Text style={styles.text}>Error, please try again</Text>
@@ -249,14 +270,21 @@ class Engineers extends Component {
             </Text>
           ) : (
             <FlatList
-              style={styles.flatList}
+              style={
+                this.state.showSearch
+                  ? styles.flatListShowSearch
+                  : styles.flatList
+              }
+              refreshControl={
+                <RefreshControl
+                  onRefresh={() => this.onRefresh()}
+                  refreshing={this.state.isFetching}
+                />
+              }
+              ListFooterComponent={this.renderFooter.bind(this)}
               data={engineers}
               renderItem={({item}) => <ListCardsEngineers item={item} />}
               keyExtractor={item => item.id.toString()}
-              onEndReached={this.loadMore}
-              onEndReachedThreshold={0.1}
-              // onTouchEndCapture={this.loadMore}
-              ListFooterComponent={this.renderFooter}
             />
           )}
         </View>
@@ -279,10 +307,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
   },
-  flatList: {marginBottom: 90},
   load: {
     marginTop: 10,
     alignItems: 'center',
+  },
+  flatList: {marginBottom: 50},
+  flatListShowSearch: {marginBottom: 100},
+  footer: {
+    padding: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  loadMoreBtn: {
+    padding: 10,
+    backgroundColor: '#800000',
+    borderRadius: 4,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  btnText: {
+    color: 'white',
+    fontSize: 15,
+    textAlign: 'center',
   },
 });
 
@@ -297,8 +345,8 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   fetch: (search, sort, order, page, limit) =>
     dispatch(fetchData(search, sort, order, page, limit)),
-  load: (search, sort, order, page, limit) =>
-    dispatch(load(search, sort, order, page, limit)),
+  loadMore: (search, sort, order, page, limit) =>
+    dispatch(loadMore(search, sort, order, page, limit)),
 });
 export default connect(
   mapStateToProps,

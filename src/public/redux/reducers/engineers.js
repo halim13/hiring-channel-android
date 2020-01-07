@@ -10,23 +10,21 @@ const engineers = (state = initialState, action) => {
   switch (action.type) {
     case 'FETCH_DATA_ENGINEERS_PENDING':
     case 'FETCH_DATA_ENGINEERS_REJECTED':
-    case 'FETCH_LOAD_DATA_ENGINEERS_REJECTED':
       return {
         ...state,
         isLoading: true,
       };
-    case 'FETCH_LOAD_DATA_ENGINEERS_PENDING':
+    case 'FETCH_LOAD_MORE_DATA_ENGINEERS_PENDING':
       return {
         ...state,
         isLoadMore: true,
       };
-    case 'FETCH_LOAD_DATA_ENGINEERS_FULFILLED':
+    case 'FETCH_LOAD_MORE_DATA_ENGINEERS_FULFILLED':
       return {
         ...state,
         items: [...state.items, ...action.payload.data.engineersData],
         pages: action.payload.data.pageDetail,
         isLoading: false,
-        isLoadMore: false,
         isError: false,
       };
     case 'CLEAR_ENGINEERS':
@@ -46,6 +44,13 @@ const engineers = (state = initialState, action) => {
         pages: action.payload.data.pageDetail,
         isLoading: false,
         isError: false,
+      };
+    case 'FETCH_LOAD_MORE_DATA_ENGINEERS_REJECTED':
+      return {
+        ...state,
+        isLoading: false,
+        isError: true,
+        isLoadMore: false,
       };
     default:
       return state;
