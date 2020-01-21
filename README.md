@@ -9,6 +9,7 @@ React Native is a JavaScript framework for writing real, natively rendering mobi
 1. <a href="https://nodejs.org/en/download/">Node Js</a>
 2. Backend API using [ExpressJS](https://github.com/halim13/hiring-app)
 3. Node_modules
+4. [react-native-cli](https://facebook.github.io/react-native/docs/getting-started)
 4. Smartphone Android
 
 ## How to run the app ?
@@ -19,8 +20,9 @@ To run Hiring Channel App, follow these steps:
 - cd hiring-channel-android
 - npm install
 - open .env file and fill the requirement
-- npm run start
-- Open browser and enter web url (ex. localhost:3000/login)
+- npm run android
+- npm start
+- Make sure your developer mode in your device is connected 
 ```
 
 ## Contributing to Hiring Channel App
