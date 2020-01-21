@@ -1,4 +1,4 @@
-<h1 align="center">ReactJS - Simple Hiring Channel App Android</h1>
+<h1 align="center">React Native - Simple Hiring Channel App Android</h1>
 
 Hiring Channel App is a feature that allows Engineers and Company  to do communicate for looking/hiring jobs. This project for handle frontend only. Built using React Native Framework.
 React Native is a JavaScript framework for writing real, natively rendering mobile applications for iOS and Android. [More about React Native](https://facebook.github.io/react-native/)
