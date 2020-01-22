@@ -14,8 +14,8 @@ import rootReducer from '../reducers/index';
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  // blacklist: ['login'],
-  whitelist: ['login'],
+  blacklist: ['login'],
+  // whitelist: ['login'],
   // blacklist: ['register', 'logout', 'companies', 'engineers'],
 };
 
