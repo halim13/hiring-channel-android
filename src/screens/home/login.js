@@ -16,6 +16,7 @@ import {StackActions, NavigationActions} from 'react-navigation';
 import Spinner from 'react-native-loading-spinner-overlay';
 import {connect} from 'react-redux';
 import {login} from '../../public/redux/action/auth';
+import {API_URL, BASE_URL} from 'react-native-dotenv';
 
 class FormLogin extends Component {
   static navigationOptions = {
@@ -95,8 +96,8 @@ class FormLogin extends Component {
       } catch (error) {
         const {messageError} = this.props;
         Alert.alert(
-          'Failed!',
-          messageError,
+          `Failed!`,
+          messageError.result,
           [
             {
               text: 'OK',

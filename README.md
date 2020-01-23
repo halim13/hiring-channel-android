@@ -6,11 +6,11 @@ React Native is a JavaScript framework for writing real, natively rendering mobi
 [![React Native](https://img.shields.io/badge/ReactNative-0.60-blue)](https://facebook.github.io/react-native/)
 
 ## Requirements
-1. <a href="https://nodejs.org/en/download/">Node Js</a>
-2. Backend API using [ExpressJS](https://github.com/halim13/hiring-app)
-3. Node_modules
-4. [react-native-cli](https://facebook.github.io/react-native/docs/getting-started)
-4. Smartphone Android
+- [`npm`](https://www.npmjs.com/get-npm)
+- [`react-native`](https://facebook.github.io/react-native/docs/getting-started)
+- [`react-native-cli`](https://facebook.github.io/react-native/docs/getting-started)
+- [`backend API`](https://github.com/halim13/hiring-app) (database)
+- Smartphone Android
 
 ## How to run the app ?
 To run Hiring Channel App, follow these steps:
@@ -22,7 +22,7 @@ To run Hiring Channel App, follow these steps:
 - open .env file and fill the requirement
 - npm run android
 - npm start
-- Make sure your developer mode in your device is connected 
+- Make sure your developer mode in your device is connected
 ```
 
 ## Contributing to Hiring Channel App
@@ -41,6 +41,16 @@ Alternatively see the GitHub documentation on [creating a pull request](https://
     <img width="250" src="./src/public/screenshoots/login.jpg">
     <img width="250" src="./src/public/screenshoots/register.jpg">
 </div>
+
+## Release APK
+
+<a href="https://drive.google.com/file/d/1LZAbQ4W-tPKYyARVNFec8ON_QgM8Ae8y/view?usp=sharing">
+  <img src="https://img.shields.io/badge/Download%20from-Google%20Drive-blue.svg?style=popout&logo=google-drive"/>
+</a>
+
+## Related Projects
+- [`backend`](https://github.com/halim13/hiring-app)
+- [`website`](https://github.com/halim13/hiring-react-js)
 
 ## Contact
 

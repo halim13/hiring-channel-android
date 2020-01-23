@@ -8,6 +8,7 @@ const initialState = {
 };
 
 const login = (state = initialState, action) => {
+  // console.log(action.payload)
   switch (action.type) {
     case 'LOGIN_PENDING':
     case 'LOGOUT_PENDING':
@@ -38,7 +39,7 @@ const login = (state = initialState, action) => {
     case 'LOGOUT_REJECTED':
       return {
         ...state,
-        error: action.payload.response.data.message,
+        // error: action.payload.response.data.message,
         isLoading: false,
         isError: true,
       };
