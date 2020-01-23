@@ -74,6 +74,14 @@ class FormLogin extends Component {
       password: password.value,
     };
     if (username.value && password.value) {
+      // await this.props
+      //   .login(data)
+      //   .then(res => {
+      //     console.warn('res',res);
+      //   })
+      //   .catch(err => {
+      //     console.warn('err',err);
+      //   })
       try {
         await this.props.login(data);
         const {token} = this.props.token;
@@ -96,7 +104,7 @@ class FormLogin extends Component {
       } catch (error) {
         const {messageError} = this.props;
         Alert.alert(
-          `Failed!`,
+          'Failed!',
           messageError.result,
           [
             {
@@ -142,13 +150,13 @@ class FormLogin extends Component {
           style={styles.image}
           source={require('../../public/images/images.jpeg')}
         />
-        {this.props.isLoading && (
+        {/* {this.props.isLoading && (
           <Spinner
             visible={this.props.isLoading}
             textContent={'Loading...'}
             textStyle={styles.spinnerTextStyle}
           />
-        )}
+        )} */}
         {/* {!this.props.isLoading && ( */}
         <>
           <View>

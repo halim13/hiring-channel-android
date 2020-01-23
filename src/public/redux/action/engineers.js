@@ -4,34 +4,30 @@ import config from '../../../public/config/config';
 export const fetchData = (search, sort, order, page, limit) => ({
   type: 'FETCH_DATA_ENGINEERS',
   payload: axios.get(
-    `${
-      config.API_URL
-    }/engineers/?search=${search}&sort=${sort}&order=${order}&page=${page}&limit=${limit}`,
+    `http://34.202.135.29:4000/api/v1/engineers/?search=${search}&sort=${sort}&order=${order}&page=${page}&limit=${limit}`,
   ),
 });
 
 export const loadMore = (search, sort, order, page, limit) => ({
   type: 'FETCH_LOAD_MORE_DATA_ENGINEERS',
   payload: axios.get(
-    `${
-      config.API_URL
-    }/engineers/?search=${search}&sort=${sort}&order=${order}&page=${page}&limit=${limit}`,
+    `http://34.202.135.29:4000/api/v1/engineers/?search=${search}&sort=${sort}&order=${order}&page=${page}&limit=${limit}`,
   ),
 });
 
 export const fetchSingleDataEngineer = id => ({
   type: 'FETCH_SINGLE_DATA_ENGINEER',
-  payload: axios.get(`${config.API_URL}/engineer/${id}`),
+  payload: axios.get(`http://34.202.135.29:4000/api/v1/engineer/${id}`),
 });
 
 export const updateEngineer = (id, data, configs) => ({
   type: 'UPDATE_DATA_ENGINEER',
-  payload: axios.put(`${config.API_URL}/engineer/${id}`, data, configs),
+  payload: axios.put(`http://34.202.135.29:4000/api/v1/engineer/${id}`, data, configs),
 });
 
 export const deleteEngineer = (id, old_photo) => ({
   type: 'DELETE_DATA_ENGINEER',
-  payload: axios.delete(`${config.API_URL}/engineer/${id}/${old_photo}`),
+  payload: axios.delete(`http://34.202.135.29:4000/api/v1/engineer/${id}/${old_photo}`),
   data: old_photo,
 });
 

@@ -14,6 +14,7 @@ const Lists = props => {
         style={styles.listItem}
         thumbnail
         onPress={() => {
+          console.warn(item.logo)
           // here we navigate and pass props the components got it
           navigation.navigate('SingleCompany', {
             id: item.id,

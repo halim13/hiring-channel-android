@@ -39,7 +39,7 @@ const login = (state = initialState, action) => {
     case 'LOGOUT_REJECTED':
       return {
         ...state,
-        // error: action.payload.response.data.message,
+        error: action.payload.response.data.message,
         isLoading: false,
         isError: true,
       };

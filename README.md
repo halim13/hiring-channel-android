@@ -40,11 +40,16 @@ Alternatively see the GitHub documentation on [creating a pull request](https://
 <div align="center">
     <img width="250" src="./src/public/screenshoots/login.jpg">
     <img width="250" src="./src/public/screenshoots/register.jpg">
+    <img width="250" src="./src/public/screenshoots/profile.jpg">
+    <img width="250" src="./src/public/screenshoots/profileEdit.jpg">
+    <img width="250" src="./src/public/screenshoots/companiesList.jpg">
+    <img width="250" src="./src/public/screenshoots/companiesSearch.jpg">
+    <img width="250" src="./src/public/screenshoots/companyProfile.jpg">
 </div>
 
 ## Release APK
 
-<a href="https://drive.google.com/file/d/1LZAbQ4W-tPKYyARVNFec8ON_QgM8Ae8y/view?usp=sharing">
+<a href="https://drive.google.com/file/d/1fbkBiJbrgRpUTmFlOs-WQlc4pwHCtee_/view?usp=sharing">
   <img src="https://img.shields.io/badge/Download%20from-Google%20Drive-blue.svg?style=popout&logo=google-drive"/>
 </a>
 
