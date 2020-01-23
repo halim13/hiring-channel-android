@@ -43,7 +43,6 @@ Alternatively see the GitHub documentation on [creating a pull request](https://
     <img width="250" src="./src/public/screenshoots/profile.jpg">
     <img width="250" src="./src/public/screenshoots/prodileEdit.jpg">
     <img width="250" src="./src/public/screenshoots/companiesList.jpg">
-    <img width="250" src="./src/public/screenshoots/companiesSearch.jpg">
     <img width="250" src="./src/public/screenshoots/companyProfile.jpg">
 </div>
 
