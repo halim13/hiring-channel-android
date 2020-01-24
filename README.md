@@ -19,6 +19,7 @@ To run Hiring Channel App, follow these steps:
 - git clone https://github.com/halim13/hiring-channel-android.git
 - cd hiring-channel-android
 - npm install
+- rename file .env.example to .env
 - open .env file and fill the requirement
 - npm run android
 - npm start
